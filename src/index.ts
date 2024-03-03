@@ -20,17 +20,38 @@ app.get('/', (req, res) => {
   res.send(`<a href="/data">get data</a>`)
 })
 
-app.post('/auth/signup', (req: Request, res: Response) => {
-  console.log('req: ', req)
-  // LOGIC TO CREATE, STORE, THEN RETURN new user
+app.post('/auth/signup', async (req: Request, res: Response) => {
+  const options = req.query as {delay: string}
+  const delay = parseInt(options.delay)
+  const response: userDB.dbResponse = await userDB.signup(
+    {
+      email: req.body.email,
+      password: req.body.password,
+      username: req.body.username || 'Anon123'
+    },
+    delay || 0
+  )  
+  if (response.user) {
+    res.setHeader('Content-Type', 'application/json')
+    res.json(response.user)
+    return
+  }
 
-  res.setHeader('Content-Type', 'application/json')
-  res.json({username: 'Dave', email: 'dave@example.com', token: '123'})
+  if (response.error)  {
+    res.setHeader('Content-Type', 'application/json')
+    res.status(400).json({message: response.error})
+  }
+
 })
 
 app.post('/auth/login', async (req: Request, res: Response) => {
-  const response: userDB.dbResponse = await userDB.login(req.body.email, req.body.password)
-  
+  const options = req.query as {delay: string}
+  const delay = parseInt(options.delay)
+  const response: userDB.dbResponse = await userDB.login(
+    req.body.email,
+    req.body.password,
+    delay || 0
+  )
   if(response.user) {
     res.setHeader('Content-Type', 'application/json')
     res.status(200).json(response.user)
