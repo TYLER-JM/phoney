@@ -1,3 +1,8 @@
+export interface dbResponse {
+  user?: User
+  error?: string
+}
+
 export interface User {
   email: string,
   username: string,
@@ -23,16 +28,20 @@ const db: UserDB = {
 }
 
 export function login(email: string, password: string) {
-  const user = findUserByEmail(email)
-  if (!user) {
-    return { error: 'User not found' }
-  } else if (user.password !== password) {
-    return { error: 'Incorrect password'}
-  }
-  return { user: new AuthenticatedUser(user.username, user.email) }
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const user = findUserByEmail(email)
+      if (!user) {
+        resolve({ error: 'User not found' }) 
+      } else if (user.password !== password) {
+        resolve({ error: 'Incorrect password' }) 
+      }
+      resolve({ user: new AuthenticatedUser(user.username, user.email) })
+    }, 2000)
+  })
 }
 
-function findUserByEmail(email: string) {
+function findUserByEmail(email: string): User {
   const user = db[email]
   return user
 }

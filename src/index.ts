@@ -28,9 +28,8 @@ app.post('/auth/signup', (req: Request, res: Response) => {
   res.json({username: 'Dave', email: 'dave@example.com', token: '123'})
 })
 
-app.post('/auth/login', (req: Request, res: Response) => {
-  console.log('req: ...', req.body)
-  const response = userDB.login(req.body.email, req.body.password)
+app.post('/auth/login', async (req: Request, res: Response) => {
+  const response: userDB.dbResponse = await userDB.login(req.body.email, req.body.password)
   
   if(response.user) {
     res.setHeader('Content-Type', 'application/json')
