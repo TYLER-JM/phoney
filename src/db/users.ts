@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises'
+
 export interface dbResponse {
   user?: User
   error?: string
@@ -51,7 +53,9 @@ export function signup(user: User, delay: number) {
         resolve({error: 'User already exists'}) 
       } else {
         const newUser = createUser(user)
-        resolve({user: newUser})
+        writeDbToFile().then(() => {
+          resolve({user: newUser})
+        })
       }
     }, delay)
   })
@@ -65,4 +69,8 @@ function findUserByEmail(email: string): User {
 function createUser(user: User) {
   db[user.email] = user
   return new AuthenticatedUser(user.username, user.email)
+}
+
+function writeDbToFile() {
+  return fs.writeFile('data/users.json', JSON.stringify(db))
 }
